@@ -2,7 +2,7 @@
 ## Check Unix Programming Tools handout for more info.
 
 # Define what compiler to use and the flags.
-CC 		=	cc
+CC 	=	cc
 CXX 	= 	CC
 CCFLAGS	= 	-g -std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Werror
 LDFLAGS	= 	-lrt

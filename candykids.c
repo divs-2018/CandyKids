@@ -132,6 +132,7 @@ void* consumerKid(void* param){
         //Sleep for either 0 or 1 seconds (randomly selected).
         sleep(rand()%2);
     }
+    pthread_exit(NULL);
 }
 
 

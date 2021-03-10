@@ -24,15 +24,15 @@ void bbuff_init(void){
 void bbuff_blocking_insert(void *item){
     do{
          
-        down(empty); //wait until there is at least one empty slot
-        down(mutex); //acquire lock
+        wait(empty); //wait until there is at least one empty slot
+        wait(mutex); //acquire lock
 
         //Insert item in buffer when not full and increment counter
         buffer[in] = item;
         in = (in + 1) % BUFFER_SIZE;
 
-        up(mutex); //release lock
-        up(full); //increment full
+        signal(mutex); //release lock
+        signal(full); //increment full
       
     }while(true);
 }
@@ -41,15 +41,15 @@ void bbuff_blocking_insert(void *item){
 void* bbuff_blocking_extract(void){
     do{
          
-        down(full); //wait until there is one full slot in the buffer
-        down(mutex); //acquire lock
+        wait(full); //wait until there is one full slot in the buffer
+        wait(mutex); //acquire lock
 
         //Remove item when buffer not empty, remove item and decrement counter
         itemConsumed = buffer[out];
         out = (out + 1) % BUFFER_SIZE;
 
-        up(mutex); //release lock
-        up(empty); //increment 'empty' becuase consumer has acquired removed the item
+        signal(mutex); //release lock
+        signal(empty); //increment 'empty' becuase consumer has acquired removed the item
         
         //counsume the candy
 

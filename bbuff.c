@@ -51,7 +51,7 @@ void* bbuff_blocking_extract(void){
         out = (out + 1) % BUFFER_SIZE;
 
         sem_post(&mutex); //release lock
-        sem_post(^empty); //increment 'empty' becuase consumer has acquired removed the item
+        sem_post(&empty); //increment 'empty' becuase consumer has acquired removed the item
         
         //counsume the candy
 

@@ -1,5 +1,6 @@
 #ifndef STATS_H
 #define STATS_H
+#define SHARED_THREADS 0
 
 void stats_init(int num_producers);
 void stats_cleanup(void);

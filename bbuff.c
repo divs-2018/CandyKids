@@ -1,5 +1,3 @@
-//Crashes at wait and signal in csil (will debug later unless someone knows why)
-
 #include "bbuff.h"
 #include <stdio.h>
 #include <unistd.h>

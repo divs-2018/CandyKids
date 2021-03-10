@@ -14,6 +14,8 @@ int mutex; //binary semaphore
 void* itemConsumed = malloc (sizeof(void*));
 
 void bbuff_init(void){
+    in = 0;
+    out = 0;
     empty = BUFFER_SIZE;
     mutex = 1;
     full = 0; 

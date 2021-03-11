@@ -26,9 +26,10 @@ typedef struct  {
     int factory_number;
     int candiesMade;
     int candiesEaten;
-    float minDelay;
-    float maxDelay;
-    float avgDelay;
+    double minDelay;
+    double maxDelay;
+    double avgDelay;
+    double totDelay;
     
 } candyFactory;
 
@@ -72,7 +73,6 @@ void stats_record_produced(int factory_number) {
     //Each time this function is called, candy has been created
     sem_wait(&mutex);
     factoryArray[factory_number].candiesMade++;
-    //printf("Factory: %d Made: %d\n", factory_number, factoryArray[factory_number].candiesMade);
     sem_post(&mutex);
 }
 void stats_record_consumed(int factory_number, double delay_in_ms) {
@@ -80,22 +80,24 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
     sem_wait(&mutex);
 	
     factoryArray[factory_number].candiesEaten += 1;
-    //printf("Factory: %d Eaten: %d\n", factory_number,     factoryArray[factory_number].candiesEaten);
-    /*if (factoryArray[factory_number].candiesEaten == 1) {
-	
-    }
-    if (delay_in_ms < factoryArray[factory_number].minDelay) {
-        factoryArray[factory_number].minDelay = delay_in_ms;
-    }
-    if (delay_in_ms > factoryArray[factory_number].maxDelay) {
-        factoryArray[factory_number].maxDelay = delay_in_ms;
-    }
-    
-    float pastDelay = factoryArray[factory_number].avgDelay;
-    
-    //Calculating AVG delay
 
-    factoryArray[factory_number].avgDelay = pastDelay + (delay_in_ms - pastDelay)/factoryArray[factory_number].candiesEaten;*/
+
+    if (factoryArray[factory_number].candiesEaten == 1) {
+	factoryArray[factory_number].minDelay = delay_in_ms;
+	factoryArray[factory_number].maxDelay = delay_in_ms;
+	factoryArray[factory_number].avgDelay = delay_in_ms;
+	factoryArray[factory_number].totDelay = delay_in_ms;
+    } else {
+	if (delay_in_ms < factoryArray[factory_number].minDelay) {
+            factoryArray[factory_number].minDelay = delay_in_ms;
+    	}
+	if (delay_in_ms > factoryArray[factory_number].maxDelay) {
+	    factoryArray[factory_number].maxDelay = delay_in_ms;
+	}
+
+	factoryArray[factory_number].totDelay += delay_in_ms;
+        factoryArray[factory_number].avgDelay = (factoryArray[factory_number].totDelay)/(double)factoryArray[factory_number].candiesEaten;
+    }
     
     sem_post(&mutex);
     
@@ -103,10 +105,11 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
 void stats_display(void) {
     int i=0;
     printf("\nStatistics: \n");
-    printf("Factory#   #Made   #Eaten  Min Delay[ms]   Avg Delay[ms]   Max Delay[ms]\n");
+    printf("%8s%10s%10s%15s%15s%15s\n","Factory#","#Made","#Eaten","Min Delay[ms]","Avg Delay[ms]","Max Delay[ms]");
+
     for (i=0; i<numFactories; i++) {
 
-	printf("%8d%8d%8d%10.5f%10.5f%10.5f\n",
+	printf("%8d%10d%10d%15.5f%15.5f%15.5f\n",
 	       i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
 	       factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
 	if (factoryArray[i].candiesMade != factoryArray[i].candiesEaten) {

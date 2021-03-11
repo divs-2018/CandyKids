@@ -18,11 +18,12 @@ void* consumerKid(void* param);
 
 int main(int argc, char* argv[])
 {
-    //Variables
+    //Declare variables
     int i = 0;
     int factories = 0;
     int kids = 0;
     int seconds = 0;
+	
     //1. Extract Arguments
     if(argc != 4){
         printf("ERROR: Number of arguments is invalid.\n");
@@ -78,9 +79,8 @@ int main(int argc, char* argv[])
     printf("Stopping consumer kid threads...\n");
     for(i=0;i<kids;i++){
         pthread_cancel(kid_threads[i]);
-	    pthread_join(kid_threads[i], NULL);
+	pthread_join(kid_threads[i], NULL);
     }
-
 
     // 9. Print statistics 
     stats_display();
@@ -90,28 +90,38 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-
+/*
+Function to acquire current time in milliseconds
+*/
 double current_time_in_ms(void){ 
     struct timespec now; 
     clock_gettime(CLOCK_REALTIME, &now); 
     return now.tv_sec * 1000.0 + now.tv_nsec/1000000.0; 
 }
 
+/*
+Function to model the candy factories which generate candy one at a time and 
+insert it into the bounded buffer.
+*/
 void* candyFactory(void* param){
     int factory_num = *((int *)param);
     
     while(!stop_thread){
         //Pick a number of seconds which it will (later) wait. The number is randomly selected between 0 and 3 (inclusive).
         int wait = (rand()%4);
+	    
         //Print a message such as: "Factory 0 ships candy & waits 2s" 
         printf("Factory %d ships candy & waits %ds\n", factory_num , wait);
+	    
         //Dynamically allocate a new candy item and populate its fields. 
         candy_t* candy = malloc(sizeof(candy_t));
         candy->creation_ts_ms = current_time_in_ms();
         candy->factory_number = factory_num;
+	    
         //Add the candy item to the bounded buffer. 
         bbuff_blocking_insert(candy);
         stats_record_produced(factory_num);
+	    
         //Sleep for number of seconds identified in the first step.
         sleep(wait);
     }
@@ -119,15 +129,21 @@ void* candyFactory(void* param){
     pthread_exit(0);
 }
 
+/*
+Function to model kids which candy one at a time from the bounded buffer.
+*/
 void* consumerKid(void* param){
-    
     while(1){
         //Extract a candy item from the bounded buffer; this will block until there is a candy item to extract. Process the item. 
         candy_t* candy = bbuff_blocking_extract(); 
+	    
         //Initially you may just want to printf() it to the screen; in the next section, you must add a statistics module that will track what candies have been eaten.
         stats_record_consumed(candy->factory_number, current_time_in_ms() - candy->creation_ts_ms);
-        //Sleep for either 0 or 1 seconds (randomly selected).
+        
+	//free allocated memory
 	free(candy);
+	    
+	//Sleep for either 0 or 1 seconds (randomly selected).
         sleep(rand()%2);
     }
     pthread_exit(0);

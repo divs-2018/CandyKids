@@ -3,25 +3,6 @@
 #include <semaphore.h>
 #include <stdlib.h>
 
-/**
- - Track # values for each candy factory
- create a struct with all required fields and then build array of such structs
- one elem for each candy-factory
- 
- stats-init() fn can init data storage and get it ready to process produced and consumed events (via respective fns)
- stats_cleanup fn  used to free any dyn alloc memory
- called before main terminates
- */
-
-/**
- - # candy each factory creates
- from candy-factory thread
- - # candy consumed from each factory
- - for each factory
- min, max, avg delays for how long it took from moment candy was produced(dyn alloc) until consumed
- by factory thread calling stats code when candy is created and kid thread calling stats code when item is consumed
- **/
-
 typedef struct  {
     int factory_number;
     int candiesMade;
@@ -33,21 +14,11 @@ typedef struct  {
     
 } candyFactory;
 
-
-/*typedef struct {
- int numFactories;
- candyFactory *factory;
- } statsData;*/
-
 candyFactory *factoryArray;
 int numFactories;
 
-//statsData stat1;
 sem_t mutex;
 
-
-
-//init data storage and get ready to process produced/consumed threads
 void stats_init(int num_producers) {
     numFactories = num_producers;
     factoryArray = malloc(numFactories*sizeof(candyFactory));
@@ -64,19 +35,16 @@ void stats_init(int num_producers) {
     
 }
 
-//frees dyn alloc mem
 void stats_cleanup(void) {
     free(factoryArray);
 }
 
 void stats_record_produced(int factory_number) {
-    //Each time this function is called, candy has been created
     sem_wait(&mutex);
     factoryArray[factory_number].candiesMade++;
     sem_post(&mutex);
 }
 void stats_record_consumed(int factory_number, double delay_in_ms) {
-    //Each time this function is called, candy has been consumed
     sem_wait(&mutex);
 	
     factoryArray[factory_number].candiesEaten += 1;
@@ -115,11 +83,5 @@ void stats_display(void) {
 	if (factoryArray[i].candiesMade != factoryArray[i].candiesEaten) {
 	    printf("ERROR: Mismatch between number made and eaten.\n");
 	}
-	
-        
     }
 }
-
-
-
-//using counting semaphore because multiple instances of candyFactory

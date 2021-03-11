@@ -10,8 +10,7 @@ typedef struct  {
     double minDelay;
     double maxDelay;
     double avgDelay;
-    double totDelay;
-    
+    double totDelay; //Used to find avgDelay later on
 } candyFactory;
 
 candyFactory *factoryArray;
@@ -49,7 +48,7 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
 	
     factoryArray[factory_number].candiesEaten += 1;
 
-
+    //First candy: Set all delays to current delay, as there is no other value to compare with
     if (factoryArray[factory_number].candiesEaten == 1) {
 	factoryArray[factory_number].minDelay = delay_in_ms;
 	factoryArray[factory_number].maxDelay = delay_in_ms;
@@ -62,7 +61,7 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
 	if (delay_in_ms > factoryArray[factory_number].maxDelay) {
 	    factoryArray[factory_number].maxDelay = delay_in_ms;
 	}
-
+        //Use total delay to calculate average delay.
 	factoryArray[factory_number].totDelay += delay_in_ms;
         factoryArray[factory_number].avgDelay = (factoryArray[factory_number].totDelay)/(double)factoryArray[factory_number].candiesEaten;
     }
@@ -72,11 +71,11 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
 }
 void stats_display(void) {
     int i=0;
+	
     printf("\nStatistics: \n");
     printf("%8s%10s%10s%15s%15s%15s\n","Factory#","#Made","#Eaten","Min Delay[ms]","Avg Delay[ms]","Max Delay[ms]");
 
     for (i=0; i<numFactories; i++) {
-
 	printf("%8d%10d%10d%15.5f%15.5f%15.5f\n",
 	       i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
 	       factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);

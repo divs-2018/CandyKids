@@ -102,10 +102,14 @@ void stats_display(void) {
     int i=0;
     printf("\nStatistics: \n");
     printf("Factory#   #Made   #Eaten  Min Delay[ms]   Avg Delay[ms]   Max Delay[ms]\n");
-    for (i=0; i<numFactories; i++) {//This logic is probably wrong
-        printf("\n%d       %d        %d       %f            %f           %f",
-               i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
-               factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
+    for (i=0; i<numFactories; i++) {
+	if (factoryArray[i].candiesMade != factoryArray[i].candiesEaten) {
+	    printf("ERROR: Mismatch between number made and eaten.");
+	}else {
+		printf("%8d%8d%8d%10.5f%10.5f%10.5f\n",
+		       i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
+		       factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
+	}
         
     }
 }

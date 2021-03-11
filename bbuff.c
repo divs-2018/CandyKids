@@ -30,7 +30,6 @@ void bbuff_blocking_insert(void *item){
     //Insert item in buffer when not full and increment counter
     buffer[in] = item;
     in = (in+1)%BUFFER_SIZE;
-
     sem_post(&mutex); //release lock
     sem_post(&full); //increment full
     
@@ -43,13 +42,13 @@ void* bbuff_blocking_extract(void){
     sem_wait(&mutex); //acquire lock
 
     //Remove item when buffer not empty, remove item and decrement counter
+
     void* item = buffer[out];
     buffer[out] = NULL;
     out = (out+1)%BUFFER_SIZE;
-
     sem_post(&mutex); //release lock
     sem_post(&empty); //increment 'empty' becuase consumer has acquired removed the item
-        
+
     return item; 
 
 }

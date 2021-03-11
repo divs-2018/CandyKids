@@ -5,10 +5,10 @@
 
 /**
  - Track # values for each candy factory
-  create a struct with all required fields and then build array of such structs
-            one elem for each candy-factory
+ create a struct with all required fields and then build array of such structs
+ one elem for each candy-factory
  
-  stats-init() fn can init data storage and get it ready to process produced and consumed events (via respective fns)
+ stats-init() fn can init data storage and get it ready to process produced and consumed events (via respective fns)
  stats_cleanup fn  used to free any dyn alloc memory
  called before main terminates
  */
@@ -34,9 +34,9 @@ typedef struct  {
 
 
 /*typedef struct {
-    int numFactories;
-    candyFactory *factory;
-} statsData;*/
+ int numFactories;
+ candyFactory *factory;
+ } statsData;*/
 
 candyFactory *factoryArray;
 int numFactories;
@@ -60,7 +60,7 @@ void stats_init(int num_producers) {
         factoryArray[i].maxDelay = 0;
         factoryArray[i].avgDelay = 0;
     }
- 
+    
 }
 
 //frees dyn alloc mem
@@ -77,18 +77,35 @@ void stats_record_produced(int factory_number) {
 void stats_record_consumed(int factory_number, double delay_in_ms) {
     //Each time this function is called, candy has been consumed
     sem_wait(&mutex);
+
     factoryArray[factory_number].candiesEaten += 1;
+    
+    if (delay_in_ms < factoryArray[factory_number].minDelay) {
+        factoryArray[factory_number].minDelay = delay_in_ms;
+    }
+    if (delay_in_ms > factoryArray[factory_number].maxDelay) {
+        factoryArray[factory_number].maxDelay = delay_in_ms;
+    }
+    
+    float pastDelay = factoryArray[factory_number].avgDelay;
+    
+    //Calculating AVG delay
+    /*factoryArray[factory_number].avgDelay = ((pastDelay)*(factoryArray[factory_number].candiesEaten -1) + delay_in_ms)/factoryArray[factory_number].candiesEaten;*/
+    //or
+    //This one apparently has better precision
+    factoryArray[factory_number].avgDelay = pastDelay + (delay_in_ms - pastDelay)/factoryArray[factory_number].candiesEaten;
+    
     sem_post(&mutex);
     
 }
 void stats_display(void) {
-     int i=0;
-     printf("\nStatistics: \n");
-     printf("Factory#   #Made   #Eaten  Min Delay[ms]   Avg Delay[ms]   Max Delay[ms]\n");
+    int i=0;
+    printf("\nStatistics: \n");
+    printf("Factory#   #Made   #Eaten  Min Delay[ms]   Avg Delay[ms]   Max Delay[ms]\n");
     for (i=0; i<numFactories; i++) {//This logic is probably wrong
         printf("\n%d       %d        %d       %f            %f           %f",
-	          i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
-	          factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
+               i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
+               factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
         
     }
 }

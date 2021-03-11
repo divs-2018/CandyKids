@@ -7,9 +7,9 @@ typedef struct  {
     int factory_number;
     int candiesMade;
     int candiesEaten;
-    double minDelay;
-    double maxDelay;
-    double avgDelay;
+    double minDelay; //Minimum time between when a candy was created and consumed over all candies created by this factory. Measured in milliseconds.
+    double maxDelay; //Maximum delay between this factory's candy being created and consumed.
+    double avgDelay; //Average delay between this factory's candy being created and consumed.
     double totDelay; //Used to find avgDelay later on
 } candyFactory;
 
@@ -18,6 +18,9 @@ int numFactories;
 
 sem_t mutex;
 
+/*
+Initialize variables
+*/
 void stats_init(int num_producers) {
     numFactories = num_producers;
     factoryArray = malloc(numFactories*sizeof(candyFactory));
@@ -34,15 +37,25 @@ void stats_init(int num_producers) {
     
 }
 
+/*
+Free up any dynamically allocated memory
+*/
 void stats_cleanup(void) {
     free(factoryArray);
 }
 
+/*
+Function to record the number of candies that each factory creates.
+*/
 void stats_record_produced(int factory_number) {
     sem_wait(&mutex);
     factoryArray[factory_number].candiesMade++;
     sem_post(&mutex);
 }
+
+/*
+Function to recrod the number of candies that are consumed from each factory.
+*/
 void stats_record_consumed(int factory_number, double delay_in_ms) {
     sem_wait(&mutex);
 	
@@ -66,9 +79,12 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
         factoryArray[factory_number].avgDelay = (factoryArray[factory_number].totDelay)/(double)factoryArray[factory_number].candiesEaten;
     }
     
-    sem_post(&mutex);
-    
+    sem_post(&mutex);   
 }
+
+/*
+Display the number of candies made and eaten for each factory, as well as the min, avg, and max delays.
+*/
 void stats_display(void) {
     int i=0;
 	

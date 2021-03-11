@@ -87,9 +87,6 @@ int main(int argc, char* argv[])
 
     // 10. Cleanup any allocated memory
     stats_cleanup();
-
-    //free();
-
     return 0;
 }
 

@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
     kids = atoi(argv[2]);
     seconds = atoi(argv[3]);
 
+
     // 2. Initialize modules 
     bbuff_init();
     stats_init(factories);
@@ -100,7 +101,7 @@ double current_time_in_ms(void){
 }
 
 void* candyFactory(void* param){
-    int factory_num = (intptr_t)param;
+    int factory_num = *((int *)param);
     while(!stop_thread){
         //Pick a number of seconds which it will (later) wait. The number is randomly selected between 0 and 3 (inclusive).
         int wait = (rand()%4);
@@ -112,7 +113,7 @@ void* candyFactory(void* param){
         candy->factory_number = factory_num;
         //Add the candy item to the bounded buffer. 
         bbuff_blocking_insert(candy);
-        stats_record_produced(factory_num);
+        stats_record_produced(param);
         //Sleep for number of seconds identified in the first step.
         free(candy);
         sleep(wait);

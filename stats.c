@@ -87,13 +87,13 @@ void stats_record_consumed(int factory_number, double delay_in_ms) {
         factoryArray[factory_number].maxDelay = delay_in_ms;
     }
     
-    float pastDelay = factoryArray[factory_number].avgDelay;
+    // float pastDelay = factoryArray[factory_number].avgDelay;
     
-    //Calculating AVG delay
-    /*factoryArray[factory_number].avgDelay = ((pastDelay)*(factoryArray[factory_number].candiesEaten -1) + delay_in_ms)/factoryArray[factory_number].candiesEaten;*/
-    //or
-    //This one apparently has better precision
-    factoryArray[factory_number].avgDelay = pastDelay + (delay_in_ms - pastDelay)/factoryArray[factory_number].candiesEaten;
+    // //Calculating AVG delay
+    // /*factoryArray[factory_number].avgDelay = ((pastDelay)*(factoryArray[factory_number].candiesEaten -1) + delay_in_ms)/factoryArray[factory_number].candiesEaten;*/
+    // //or
+    // //This one apparently has better precision
+    // factoryArray[factory_number].avgDelay = pastDelay + (delay_in_ms - pastDelay)/factoryArray[factory_number].candiesEaten;
     
     sem_post(&mutex);
     
@@ -103,13 +103,12 @@ void stats_display(void) {
     printf("\nStatistics: \n");
     printf("Factory#   #Made   #Eaten  Min Delay[ms]   Avg Delay[ms]   Max Delay[ms]\n");
     for (i=0; i<numFactories; i++) {
-	if (factoryArray[i].candiesMade != factoryArray[i].candiesEaten) {
-	    printf("ERROR: Mismatch between number made and eaten.");
-	}else {
-		printf("%8d%8d%8d%10.5f%10.5f%10.5f\n",
+        printf("%8d%8d%8d%10.5f%10.5f%10.5f\n",
 		       i, factoryArray[i].candiesMade, factoryArray[i].candiesEaten,
 		       factoryArray[i].minDelay, factoryArray[i].avgDelay, factoryArray[i].maxDelay);
-	}
+	    if(factoryArray[i].candiesMade != factoryArray[i].candiesEaten) {
+	        printf("ERROR: Mismatch between number made and eaten.");
+	    }
         
     }
 }

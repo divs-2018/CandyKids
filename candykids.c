@@ -36,7 +36,6 @@ int main(int argc, char* argv[])
     kids = atoi(argv[2]);
     seconds = atoi(argv[3]);
 
-
     // 2. Initialize modules 
     bbuff_init();
     stats_init(factories);
@@ -106,20 +105,20 @@ void* candyFactory(void* param){
         //Pick a number of seconds which it will (later) wait. The number is randomly selected between 0 and 3 (inclusive).
         int wait = (rand()%4);
         //Print a message such as: "Factory 0 ships candy & waits 2s" 
-        printf("Factory %d ships candy & waits %ds", factory_num , wait);
+        printf("Factory %d ships candy & waits %ds\n", factory_num , wait);
         //Dynamically allocate a new candy item and populate its fields. 
         candy_t* candy = malloc(sizeof(candy_t));
         candy->creation_ts_ms = current_time_in_ms();
         candy->factory_number = factory_num;
         //Add the candy item to the bounded buffer. 
         bbuff_blocking_insert(candy);
-        stats_record_produced(param);
+        stats_record_produced(factory_num);
         //Sleep for number of seconds identified in the first step.
         free(candy);
         sleep(wait);
     }
     printf("Candy factory %d done\n", factory_num);
-    printf("Done!\n");
+
     pthread_exit(NULL);
 }
 
@@ -129,11 +128,11 @@ void* consumerKid(void* param){
         candy_t* candy = malloc(sizeof(candy_t));
         candy = bbuff_blocking_extract();
         //Initially you may just want to printf() it to the screen; in the next section, you must add a statistics module that will track what candies have been eaten.
+	printf("Factory # in consumer kid:%d\n", candy->factory_number);
         stats_record_consumed(candy->factory_number, current_time_in_ms() - candy->creation_ts_ms);
         //Sleep for either 0 or 1 seconds (randomly selected).
         sleep(rand()%2);
     }
     pthread_exit(NULL);
 }
-
 
